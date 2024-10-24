@@ -9,8 +9,9 @@ use Yii;
  *
  * @property int $id
  * @property string $name
+ * @property string $path_url
  * @property string $base_url
- * @property string $mine_type
+ * @property string $mime_type
  *
  * @property ProjectImage[] $projectImages
  * @property Testimonial[] $testimonials
@@ -31,8 +32,8 @@ class File extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'base_url', 'mine_type'], 'required'],
-            [['name', 'base_url', 'mine_type'], 'string', 'max' => 255],
+            [['name', 'path_url', 'base_url', 'mime_type'], 'required'],
+            [['name', 'path_url', 'base_url', 'mime_type'], 'string', 'max' => 255],
         ];
     }
 
@@ -44,8 +45,9 @@ class File extends \yii\db\ActiveRecord
         return [
             'id' => Yii::t('app', 'ID'),
             'name' => Yii::t('app', 'Name'),
+            'path_url' => Yii::t('app', 'Base Url'),
             'base_url' => Yii::t('app', 'Base Url'),
-            'mine_type' => Yii::t('app', 'Mine Type'),
+            'mime_type' => Yii::t('app', 'Mine Type'),
         ];
     }
 
@@ -67,5 +69,15 @@ class File extends \yii\db\ActiveRecord
     public function getTestimonials()
     {
         return $this->hasMany(Testimonial::className(), ['customer_image_id' => 'id']);
+    }
+
+    public function absoluteUrl(){
+        return $this->base_url .'/'. $this->name;
+    }
+
+    public function afterDelete()
+    {
+        parent::afterDelete();
+        unlink($this->path_url. '/'. $this->name);
     }
 }

@@ -2,19 +2,16 @@
 
 namespace backend\controllers;
 
-use common\models\Project;
-use backend\models\ProjectSearch;
-use common\models\ProjectImage;
-use Yii;
+use common\models\Testimonial;
+use backend\models\TestimonialSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\web\UploadedFile;
 
 /**
- * ProjectController implements the CRUD actions for Project model.
+ * TestimonialController implements the CRUD actions for Testimonial model.
  */
-class ProjectController extends Controller
+class TestimonialController extends Controller
 {
     /**
      * @inheritDoc
@@ -28,7 +25,6 @@ class ProjectController extends Controller
                     'class' => VerbFilter::className(),
                     'actions' => [
                         'delete' => ['POST'],
-                        'delete-project-image' => ['GET', 'POST'],
                     ],
                 ],
             ]
@@ -36,13 +32,13 @@ class ProjectController extends Controller
     }
 
     /**
-     * Lists all Project models.
+     * Lists all Testimonial models.
      *
      * @return string
      */
     public function actionIndex()
     {
-        $searchModel = new ProjectSearch();
+        $searchModel = new TestimonialSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -52,7 +48,7 @@ class ProjectController extends Controller
     }
 
     /**
-     * Displays a single Project model.
+     * Displays a single Testimonial model.
      * @param int $id ID
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
@@ -65,22 +61,17 @@ class ProjectController extends Controller
     }
 
     /**
-     * Creates a new Project model.
+     * Creates a new Testimonial model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
-        $model = new Project();
+        $model = new Testimonial();
 
         if ($this->request->isPost) {
-            if ($model->load($this->request->post())) {
-                $model->loadUploadedImageFiles();
-                if ($model->save()) {
-                    $model->saveImages();
-                    Yii::$app->session->setFlash('success', 'Successfully saved');
-                    return $this->redirect(['view', 'id' => $model->id]);
-                }
+            if ($model->load($this->request->post()) && $model->save()) {
+                return $this->redirect(['view', 'id' => $model->id]);
             }
         } else {
             $model->loadDefaultValues();
@@ -92,7 +83,7 @@ class ProjectController extends Controller
     }
 
     /**
-     * Updates an existing Project model.
+     * Updates an existing Testimonial model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param int $id ID
      * @return string|\yii\web\Response
@@ -101,13 +92,9 @@ class ProjectController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-        if ($this->request->isPost && $model->load($this->request->post())) {
-            $model->loadUploadedImageFiles();
-            if($model->save()){
-                $model->saveImages();
-                Yii::$app->session->setFlash('success', 'Project updated successfully');
-                return $this->redirect(['view', 'id' => $model->id]);
-            }
+
+        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $model->id]);
         }
 
         return $this->render('update', [
@@ -116,7 +103,7 @@ class ProjectController extends Controller
     }
 
     /**
-     * Deletes an existing Project model.
+     * Deletes an existing Testimonial model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param int $id ID
      * @return \yii\web\Response
@@ -129,29 +116,19 @@ class ProjectController extends Controller
         return $this->redirect(['index']);
     }
 
-    public function actionDeleteProjectImage(){
-        $image = ProjectImage::findOne($this->request->post('key'));
-        if(!$image){
-            throw new NotFoundHttpException();
-        }
-        if($image->file->delete()){
-            return json_encode(null);
-        }
-        return json_encode(['error' => true]);
-        
-    }
     /**
-     * Finds the Project model based on its primary key value.
+     * Finds the Testimonial model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param int $id ID
-     * @return Project the loaded model
+     * @return Testimonial the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Project::findOne(['id' => $id])) !== null) {
+        if (($model = Testimonial::findOne(['id' => $id])) !== null) {
             return $model;
         }
+
         throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
     }
 }
